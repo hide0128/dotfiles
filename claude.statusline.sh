@@ -15,7 +15,7 @@ RATE_FILE="$HOME/.claude/usd_jpy_rate"
 RATE=150
 if [ -f "$RATE_FILE" ]; then
   age=$(( $(date +%s) - $(date -r "$RATE_FILE" +%s) ))
-  if [ "$age" -lt 3600 ]; then
+  if [ "$age" -lt 86400 ]; then
     RATE=$(cat "$RATE_FILE")
   else
     (curl -sf "https://open.er-api.com/v6/latest/USD" | jq -r '.rates.JPY' > "$RATE_FILE" 2>/dev/null) &
