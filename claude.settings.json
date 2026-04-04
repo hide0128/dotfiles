@@ -1,4 +1,8 @@
 {
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75"
   },
