@@ -10,7 +10,21 @@ SESSION_RESET=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty
 WEEKLY_PCT=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 WEEKLY_RESET=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
-COST_FMT=$(printf '$%.3f' "$COST")
+# 為替レート（1時間キャッシュ）
+RATE_FILE="$HOME/.claude/usd_jpy_rate"
+RATE=150
+if [ -f "$RATE_FILE" ]; then
+  age=$(( $(date +%s) - $(date -r "$RATE_FILE" +%s) ))
+  if [ "$age" -lt 3600 ]; then
+    RATE=$(cat "$RATE_FILE")
+  else
+    (curl -sf "https://open.er-api.com/v6/latest/USD" | jq -r '.rates.JPY' > "$RATE_FILE" 2>/dev/null) &
+  fi
+else
+  (curl -sf "https://open.er-api.com/v6/latest/USD" | jq -r '.rates.JPY' > "$RATE_FILE" 2>/dev/null) &
+fi
+COST_JPY=$(awk "BEGIN {printf \"%.0f\", $COST * $RATE}")
+COST_FMT="¥${COST_JPY}"
 IN_K=$(awk "BEGIN {printf \"%.1f\", $IN_TOKENS/1000}")
 OUT_K=$(awk "BEGIN {printf \"%.1f\", $OUT_TOKENS/1000}")
 
