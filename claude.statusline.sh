@@ -14,7 +14,7 @@ COST_FMT=$(printf '$%.3f' "$COST")
 IN_K=$(awk "BEGIN {printf \"%.1f\", $IN_TOKENS/1000}")
 OUT_K=$(awk "BEGIN {printf \"%.1f\", $OUT_TOKENS/1000}")
 
-fmt_reset() {
+fmt_session_reset() {
   local ts="$1"
   [ -z "$ts" ] && echo "?" && return
   local now diff h m
@@ -26,12 +26,18 @@ fmt_reset() {
   [ "$h" -gt 0 ] && echo "${h}h${m}m" || echo "${m}m"
 }
 
+fmt_weekly_reset() {
+  local ts="$1"
+  [ -z "$ts" ] && echo "月 7:00" && return
+  date -r "$ts" "+%a %H:%M" 2>/dev/null || echo "月 7:00"
+}
+
 if [ -n "$SESSION_PCT" ] && [ -n "$WEEKLY_PCT" ]; then
   SESSION_INT=$(printf '%.0f' "$SESSION_PCT")
   WEEKLY_INT=$(printf '%.0f' "$WEEKLY_PCT")
-  S_RESET=$(fmt_reset "$SESSION_RESET")
-  W_RESET=$(fmt_reset "$WEEKLY_RESET")
-  echo "💰 ${COST_FMT} | 📊 ${CTX_PCT}% | 🕐 ${SESSION_INT}%(${S_RESET}) | 📅 ${WEEKLY_INT}%(${W_RESET}) | ↑${IN_K}k ↓${OUT_K}k"
+  S_RESET=$(fmt_session_reset "$SESSION_RESET")
+  W_RESET=$(fmt_weekly_reset "$WEEKLY_RESET")
+  echo "💰 ${COST_FMT} | 📊 ${CTX_PCT}% | 🕐 ${SESSION_INT}%(${S_RESET}) | 📅 ${WEEKLY_INT}%(${W_RESET}リセット) | ↑${IN_K}k ↓${OUT_K}k"
 else
   echo "💰 ${COST_FMT} | 📊 ${CTX_PCT}% | ↑${IN_K}k ↓${OUT_K}k"
 fi
